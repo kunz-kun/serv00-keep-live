@@ -1,0 +1,35 @@
+# .github/workflows/keepalive.yml
+name: Serv00 Web Login Keepalive
+
+on:
+  # 1. 允许手动触发 (方便测试)
+  workflow_dispatch:
+  # 2. 定时触发 (每周一和周四的 UTC 0点，对应北京时间早上8点)
+  schedule:
+    - cron: '0 0 1 * *'
+
+jobs:
+  login_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code (拉取代码)
+      uses: actions/checkout@v3
+
+    - name: Set up Python (安装 Python)
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies (安装依赖)
+      run: |
+        pip install playwright
+        playwright install chromium
+
+    - name: Run Login Script (运行脚本)
+      env:
+        # 将 GitHub Secrets 注入到环境变量中
+        SERV00_URL: ${{ secrets.SERV00_URL }}
+        SERV00_USER: ${{ secrets.SERV00_USER }}
+        SERV00_PASS: ${{ secrets.SERV00_PASS }}
+      run: python login.py
